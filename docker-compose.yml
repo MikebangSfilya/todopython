@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=${DB_NAME:-todo_db}
+      - POSTGRES_USER=${DB_USER:-todo_user}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-todo_pass}
+
+  web:
+    build: .
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      - DB_NAME=${DB_NAME:-todo_db}
+      - DB_USER=${DB_USER:-todo_user}
+      - DB_PASSWORD=${DB_PASSWORD:-todo_pass}
+      - DB_HOST=${DB_HOST:-db}
+      - DB_PORT=${DB_PORT:-5432}
+      - DJANGO_DEBUG=${DJANGO_DEBUG:-1}
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-development-key}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0}
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

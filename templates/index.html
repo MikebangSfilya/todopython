@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task Tracker</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --line: #d8dee9;
+      --text: #18202f;
+      --muted: #667085;
+      --accent: #1f7a5b;
+      --accent-dark: #176348;
+      --danger: #b42318;
+      --warn: #b76e00;
+      --shadow: 0 12px 28px rgba(26, 35, 50, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      padding: 9px 12px;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      font-weight: 650;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+    }
+
+    button.secondary {
+      background: #e8edf5;
+      color: var(--text);
+    }
+
+    button.secondary:hover {
+      background: #dce3ee;
+    }
+
+    button.danger {
+      background: var(--danger);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      padding: 9px 10px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+
+    label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 38px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .brand {
+      display: grid;
+      gap: 2px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 26px;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .auth {
+      max-width: 430px;
+      margin: 10vh auto 0;
+      padding: 22px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .auth-tabs,
+    .row,
+    .toolbar,
+    .task-actions,
+    .meta {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .auth-tabs button {
+      flex: 1;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .sidebar,
+    .main {
+      display: grid;
+      gap: 14px;
+    }
+
+    .section {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 72px;
+      display: grid;
+      align-content: center;
+      gap: 2px;
+    }
+
+    .stat strong {
+      font-size: 22px;
+    }
+
+    .task-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .task {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+      display: grid;
+      gap: 10px;
+    }
+
+    .task.done {
+      background: #f2fbf7;
+    }
+
+    .task-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .task-title {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .task-title strong {
+      overflow-wrap: anywhere;
+      font-size: 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      padding: 3px 8px;
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .pill.high {
+      color: var(--danger);
+      border-color: #f3b7b1;
+      background: #fff5f4;
+    }
+
+    .pill.medium {
+      color: var(--warn);
+      border-color: #f3cf8f;
+      background: #fff8e8;
+    }
+
+    .pill.done {
+      color: var(--accent);
+      border-color: #a7dec6;
+      background: #eefaf5;
+    }
+
+    .empty,
+    .notice {
+      padding: 12px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px dashed var(--line);
+      color: var(--muted);
+    }
+
+    .notice.error {
+      color: var(--danger);
+      background: #fff5f4;
+      border-color: #f3b7b1;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 860px) {
+      .grid,
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar,
+      .task-head {
+        align-items: stretch;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section id="authView" class="auth panel">
+      <div class="brand">
+        <h1>Task Tracker</h1>
+      </div>
+
+      <div class="auth-tabs">
+        <button id="loginTab" type="button">Вход</button>
+        <button id="registerTab" type="button" class="secondary">Регистрация</button>
+      </div>
+
+      <form id="authForm" class="section" style="padding: 0;">
+        <label>
+          Логин
+          <input id="username" autocomplete="username" required>
+        </label>
+        <label id="emailWrap" class="hidden">
+          Email
+          <input id="email" type="email" autocomplete="email">
+        </label>
+        <label>
+          Пароль
+          <input id="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button id="authSubmit" type="submit">Войти</button>
+      </form>
+      <div id="authMessage" class="notice hidden"></div>
+    </section>
+
+    <section id="appView" class="hidden">
+      <header class="topbar">
+        <div class="brand">
+          <h1>Task Tracker</h1>
+          <p id="sessionLabel" class="muted"></p>
+        </div>
+        <div class="row">
+          <a href="/api/schema/swagger-ui/" target="_blank"><button type="button" class="secondary">Swagger</button></a>
+          <button id="logoutButton" type="button" class="secondary">Выйти</button>
+        </div>
+      </header>
+
+      <div class="grid">
+        <aside class="sidebar">
+          <section class="section panel">
+            <h2>Новая задача</h2>
+            <form id="taskForm" class="section" style="padding: 0;">
+              <label>
+                Название
+                <input id="taskTitle" required>
+              </label>
+              <label>
+                Описание
+                <textarea id="taskDescription"></textarea>
+              </label>
+              <label>
+                Дедлайн
+                <input id="taskDeadline" type="datetime-local">
+              </label>
+              <div class="row">
+                <label style="flex: 1;">
+                  Статус
+                  <select id="taskStatus">
+                    <option value="todo">К выполнению</option>
+                    <option value="in_progress">В работе</option>
+                    <option value="done">Готово</option>
+                  </select>
+                </label>
+                <label style="flex: 1;">
+                  Приоритет
+                  <select id="taskPriority">
+                    <option value="medium">Средний</option>
+                    <option value="low">Низкий</option>
+                    <option value="high">Высокий</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                Категория
+                <select id="taskCategory"></select>
+              </label>
+              <label>
+                Метки
+                <select id="taskLabels" multiple size="4"></select>
+              </label>
+              <button type="submit">Создать</button>
+            </form>
+          </section>
+
+          <section class="section panel">
+            <h2>Категории и метки</h2>
+            <form id="categoryForm" class="row">
+              <input id="categoryName" placeholder="Категория">
+              <button type="submit">+</button>
+            </form>
+            <form id="labelForm" class="row">
+              <input id="labelName" placeholder="Метка">
+              <input id="labelColor" placeholder="#1f7a5b">
+              <button type="submit">+</button>
+            </form>
+          </section>
+        </aside>
+
+        <section class="main">
+          <section class="section panel">
+            <div class="toolbar">
+              <label style="min-width: 150px;">
+                Статус
+                <select id="filterStatus">
+                  <option value="">Все</option>
+                  <option value="todo">К выполнению</option>
+                  <option value="in_progress">В работе</option>
+                  <option value="done">Готово</option>
+                </select>
+              </label>
+              <label style="min-width: 150px;">
+                Приоритет
+                <select id="filterPriority">
+                  <option value="">Все</option>
+                  <option value="low">Низкий</option>
+                  <option value="medium">Средний</option>
+                  <option value="high">Высокий</option>
+                </select>
+              </label>
+              <label style="min-width: 220px;">
+                Поиск
+                <input id="searchText" placeholder="Название или описание">
+              </label>
+              <button id="refreshButton" type="button" class="secondary">Обновить</button>
+            </div>
+          </section>
+
+          <section class="stats" id="stats"></section>
+          <section class="task-list" id="taskList"></section>
+          <div id="appMessage" class="notice hidden"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      mode: "login",
+      token: localStorage.getItem("accessToken"),
+      username: localStorage.getItem("username"),
+      categories: [],
+      labels: [],
+      tasks: [],
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function setMessage(target, message, isError = false) {
+      const node = $(target);
+      node.textContent = message;
+      node.classList.toggle("hidden", !message);
+      node.classList.toggle("error", isError);
+    }
+
+    function authHeaders() {
+      return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${state.token}`,
+      };
+    }
+
+    async function request(path, options = {}) {
+      const response = await fetch(path, options);
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : null;
+      if (!response.ok) {
+        throw new Error(formatError(data));
+      }
+      return data;
+    }
+
+    function formatError(data) {
+      if (!data) return "Ошибка запроса";
+      if (typeof data.detail === "string") return data.detail;
+      return Object.entries(data).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(", ") : value}`).join("; ");
+    }
+
+    function normalizeList(data) {
+      return Array.isArray(data) ? data : data.results || [];
+    }
+
+    function showAuth() {
+      $("authView").classList.remove("hidden");
+      $("appView").classList.add("hidden");
+    }
+
+    function showApp() {
+      $("authView").classList.add("hidden");
+      $("appView").classList.remove("hidden");
+      $("sessionLabel").textContent = state.username ? `Вы вошли как ${state.username}` : "";
+    }
+
+    function setAuthMode(mode) {
+      state.mode = mode;
+      $("emailWrap").classList.toggle("hidden", mode !== "register");
+      $("authSubmit").textContent = mode === "register" ? "Зарегистрироваться" : "Войти";
+      $("loginTab").classList.toggle("secondary", mode !== "login");
+      $("registerTab").classList.toggle("secondary", mode !== "register");
+      setMessage("authMessage", "");
+    }
+
+    async function handleAuth(event) {
+      event.preventDefault();
+      const username = $("username").value.trim();
+      const password = $("password").value;
+      const email = $("email").value.trim();
+
+      try {
+        if (state.mode === "register") {
+          await request("/api/register/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, email, password }),
+          });
+        }
+
+        const tokenData = await request("/api/token/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+
+        state.token = tokenData.access;
+        state.username = username;
+        localStorage.setItem("accessToken", state.token);
+        localStorage.setItem("username", username);
+        showApp();
+        await loadAll();
+      } catch (error) {
+        setMessage("authMessage", error.message, true);
+      }
+    }
+
+    async function loadAll() {
+      try {
+        setMessage("appMessage", "");
+        const [categories, labels, tasks, stats] = await Promise.all([
+          request("/api/categories/", { headers: authHeaders() }),
+          request("/api/labels/", { headers: authHeaders() }),
+          request(buildTasksUrl(), { headers: authHeaders() }),
+          request("/api/tasks/stats/", { headers: authHeaders() }),
+        ]);
+
+        state.categories = normalizeList(categories);
+        state.labels = normalizeList(labels);
+        state.tasks = normalizeList(tasks);
+        renderCategories();
+        renderLabels();
+        renderTasks();
+        renderStats(stats);
+      } catch (error) {
+        setMessage("appMessage", error.message, true);
+      }
+    }
+
+    function buildTasksUrl() {
+      const params = new URLSearchParams();
+      if ($("filterStatus").value) params.set("status", $("filterStatus").value);
+      if ($("filterPriority").value) params.set("priority", $("filterPriority").value);
+      if ($("searchText").value.trim()) params.set("search", $("searchText").value.trim());
+      params.set("ordering", "deadline");
+      return `/api/tasks/?${params.toString()}`;
+    }
+
+    function renderCategories() {
+      $("taskCategory").innerHTML = `<option value="">Без категории</option>` + state.categories.map((category) => (
+        `<option value="${category.id}">${escapeHtml(category.name)}</option>`
+      )).join("");
+    }
+
+    function renderLabels() {
+      $("taskLabels").innerHTML = state.labels.map((label) => (
+        `<option value="${label.id}">${escapeHtml(label.name)}</option>`
+      )).join("");
+    }
+
+    function renderStats(stats) {
+      const items = [
+        ["Всего", stats.total],
+        ["Готово", stats.completed],
+        ["Активно", stats.active],
+        ["Просрочено", stats.overdue],
+        ["Процент", `${stats.completion_rate}%`],
+      ];
+      $("stats").innerHTML = items.map(([label, value]) => `
+        <div class="stat panel">
+          <span class="muted">${label}</span>
+          <strong>${value}</strong>
+        </div>
+      `).join("");
+    }
+
+    function renderTasks() {
+      if (!state.tasks.length) {
+        $("taskList").innerHTML = `<div class="empty">Задач пока нет.</div>`;
+        return;
+      }
+
+      $("taskList").innerHTML = state.tasks.map((task) => {
+        const labels = (task.labels || []).map((label) => `<span class="pill">${escapeHtml(label.name)}</span>`).join("");
+        const deadline = task.deadline
+          ? new Date(task.deadline).toLocaleString("ru-RU", { dateStyle: "medium", timeStyle: "short" })
+          : "Без срока";
+        const category = task.category_detail ? task.category_detail.name : "без категории";
+        return `
+          <article class="task ${task.status === "done" ? "done" : ""}">
+            <div class="task-head">
+              <div class="task-title">
+                <strong>${escapeHtml(task.title)}</strong>
+                <span class="muted">${escapeHtml(task.description || "")}</span>
+              </div>
+              <div class="meta">
+                <span class="pill ${task.status === "done" ? "done" : ""}">${escapeHtml(task.status_display || task.status)}</span>
+                <span class="pill ${task.priority}">${escapeHtml(task.priority_display || task.priority)}</span>
+              </div>
+            </div>
+            <div class="meta">
+              <span class="pill">${escapeHtml(category)}</span>
+              <span class="pill">${deadline}</span>
+              ${labels}
+            </div>
+            <div class="task-actions">
+              <button type="button" data-action="complete" data-id="${task.id}" ${task.status === "done" ? "disabled" : ""}>Готово</button>
+              <button type="button" class="secondary" data-action="reopen" data-id="${task.id}">Открыть</button>
+              <button type="button" class="danger" data-action="delete" data-id="${task.id}">Удалить</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    async function createCategory(event) {
+      event.preventDefault();
+      const name = $("categoryName").value.trim();
+      if (!name) return;
+      await request("/api/categories/", {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ name }),
+      });
+      $("categoryName").value = "";
+      await loadAll();
+    }
+
+    async function createLabel(event) {
+      event.preventDefault();
+      const name = $("labelName").value.trim();
+      const color = $("labelColor").value.trim();
+      if (!name) return;
+      await request("/api/labels/", {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ name, color }),
+      });
+      $("labelName").value = "";
+      $("labelColor").value = "";
+      await loadAll();
+    }
+
+    async function createTask(event) {
+      event.preventDefault();
+      const selectedLabels = [...$("taskLabels").selectedOptions].map((option) => Number(option.value));
+      const payload = {
+        title: $("taskTitle").value,
+        description: $("taskDescription").value,
+        status: $("taskStatus").value,
+        priority: $("taskPriority").value,
+        label_ids: selectedLabels,
+      };
+      if ($("taskDeadline").value) payload.deadline = new Date($("taskDeadline").value).toISOString();
+      if ($("taskCategory").value) payload.category = Number($("taskCategory").value);
+
+      await request("/api/tasks/", {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+      });
+      event.target.reset();
+      await loadAll();
+    }
+
+    async function handleTaskAction(event) {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const id = button.dataset.id;
+      const action = button.dataset.action;
+
+      if (action === "delete") {
+        await fetch(`/api/tasks/${id}/`, { method: "DELETE", headers: authHeaders() });
+      } else {
+        await request(`/api/tasks/${id}/${action}/`, { method: "POST", headers: authHeaders() });
+      }
+      await loadAll();
+    }
+
+    function logout() {
+      state.token = null;
+      state.username = null;
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("username");
+      showAuth();
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#039;",
+      }[char]));
+    }
+
+    $("loginTab").addEventListener("click", () => setAuthMode("login"));
+    $("registerTab").addEventListener("click", () => setAuthMode("register"));
+    $("authForm").addEventListener("submit", handleAuth);
+    $("logoutButton").addEventListener("click", logout);
+    $("categoryForm").addEventListener("submit", createCategory);
+    $("labelForm").addEventListener("submit", createLabel);
+    $("taskForm").addEventListener("submit", createTask);
+    $("taskList").addEventListener("click", handleTaskAction);
+    $("refreshButton").addEventListener("click", loadAll);
+    $("filterStatus").addEventListener("change", loadAll);
+    $("filterPriority").addEventListener("change", loadAll);
+    $("searchText").addEventListener("input", () => {
+      clearTimeout(window.searchTimer);
+      window.searchTimer = setTimeout(loadAll, 250);
+    });
+
+    if (state.token) {
+      showApp();
+      loadAll();
+    } else {
+      showAuth();
+    }
+  </script>
+</body>
+</html>
